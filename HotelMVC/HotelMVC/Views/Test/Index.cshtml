@@ -1,11 +1,13 @@
 ﻿@model HotelMVC.Models.TestModel
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Testowy widok";
 }
 
-<h2>Index</h2>
+<h2>Testowy widok</h2>
 
+<p>@ViewData["dana1"]</p>
+<p>@ViewBag.Dana2</p>
 
 @using (Html.BeginForm())
 {

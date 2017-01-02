@@ -10,15 +10,18 @@ namespace HotelMVC.Controllers
     public class TestController : Controller
     {
         // GET: Test
-        public ActionResult Index()
+        public ActionResult Index(string nazwa = "nazwa domyślna", int il = 0)
         {
             TestModel model = new TestModel()
             {
-                nazwa = "wpisz nazwę",
-                ilosc = 0,
+                nazwa = nazwa,
+                ilosc = il,
                 data = DateTime.Now,
                 waga = 0.0
             };
+
+            ViewData["dana1"] = "Cześć, ja jestem przekazana przez ViewData.";
+            ViewBag.Dana2 = "Cześć, ja jestem przekazana przez ViewBag.";
 
             return View(model);
         }

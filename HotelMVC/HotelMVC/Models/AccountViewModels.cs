@@ -64,6 +64,12 @@ namespace HotelMVC.Models
 
     public class RegisterViewModel
     {
+        [Display(Name = "Imię")]
+        public string Imie { get; set; }
+
+        [Display(Name = "Nazwisko")]
+        public string Nazwisko { get; set; }
+
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]
@@ -79,6 +85,10 @@ namespace HotelMVC.Models
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        [Required]
+        [Display(Name = "Uprawnienie")]
+        public int Uprawnienie { get; set; }
     }
 
     public class ResetPasswordViewModel

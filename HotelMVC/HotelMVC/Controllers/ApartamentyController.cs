@@ -34,24 +34,46 @@ namespace HotelMVC.Controllers
         }
 
         // GET: Apartamenty/Details/5
-        public ActionResult Details(int? id)
+        public ActionResult Details(int? id, int? idWizyty)
         {
+            if (idWizyty.HasValue)
+            {
+                ViewData["idWizyty"] = idWizyty.Value;
+            }
+
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Apartamenty apartamenty = db.Apartamenty.Find(id);
-            if (apartamenty == null)
+
+            Apartamenty apartament =
+                db.Apartamenty
+                .Include("Wizyty")
+                .Include("UdogodnieniaApartamenty.Udogodnienie")
+                .First(x => x.IdApartamentu == id);
+
+            if (apartament == null)
             {
                 return HttpNotFound();
             }
-            return View(apartamenty);
+
+            ApartamentyDisplayViewModel ap = new ApartamentyDisplayViewModel(apartament);
+
+            return View(ap);
         }
 
         // GET: Apartamenty/Create
         public ActionResult Create()
         {
-            return View();
+            ApartamentyEditViewModel model = new ApartamentyEditViewModel()
+            {
+                Apartament = new Apartamenty(),
+                WszystkieUdogodnienia = db.Udogodnienia.ToList(),
+                WybraneUdogodeniniaIds = new int[] { },
+                WybraneUdogodnienia = new List<Udogodnienia>()
+            };
+
+            return View(model);
         }
 
         // POST: Apartamenty/Create
@@ -59,16 +81,34 @@ namespace HotelMVC.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "IdApartamentu,Nazwa,Cena,IloscOsob,Opis,Ulica,Miasto,KodPocztowy,IdWlasciciel")] Apartamenty apartamenty)
+        public ActionResult Create(ApartamentyEditViewModel model)
         {
             if (ModelState.IsValid)
             {
-                db.Apartamenty.Add(apartamenty);
+                Apartamenty ap = model.Apartament;
+
+                ap.IdWlasciciel = User.Identity.GetUserId();
+                db.Apartamenty.Add(ap);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+
+                List<UdogodnieniaApartamenty> udogodnieniaApartamenty = new List<UdogodnieniaApartamenty>();
+
+                foreach (var u in model.WybraneUdogodeniniaIds)
+                {
+                    db.UdogodnieniaApartamenty.Add(new UdogodnieniaApartamenty()
+                    {
+                        IdApartamentu = ap.IdApartamentu,
+                        IdUdogodnienia = u
+                    });
+                }
+
+                db.SaveChanges();
+                return RedirectToAction("MojeApartamenty");
             }
 
-            return View(apartamenty);
+            model.WszystkieUdogodnienia = db.Udogodnienia.ToList();
+            model.WybraneUdogodnienia = db.Udogodnienia.ToList().Where(x => model.WybraneUdogodeniniaIds.Contains(x.IdUdogodnienia)).ToList();
+            return View(model);
         }
 
         // GET: Apartamenty/Edit/5
@@ -83,7 +123,17 @@ namespace HotelMVC.Controllers
             {
                 return HttpNotFound();
             }
-            return View(apartamenty);
+
+            ApartamentyEditViewModel model = new ApartamentyEditViewModel()
+            {
+                Apartament = apartamenty,
+                WszystkieUdogodnienia = db.Udogodnienia.ToList(),
+                WybraneUdogodnienia = db.UdogodnieniaApartamenty.Where(x => x.IdApartamentu == id).Select(u => u.Udogodnienie).ToList(),
+            };
+
+            model.WybraneUdogodeniniaIds = model.WybraneUdogodnienia.Select(x => x.IdUdogodnienia).ToArray();
+
+            return View(model);
         }
 
         // POST: Apartamenty/Edit/5
@@ -91,15 +141,57 @@ namespace HotelMVC.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "IdApartamentu,Nazwa,Cena,IloscOsob,Opis,Ulica,Miasto,KodPocztowy,IdWlasciciel")] Apartamenty apartamenty)
+        public ActionResult Edit(ApartamentyEditViewModel model)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(apartamenty).State = EntityState.Modified;
+                Apartamenty ap_new = model.Apartament;
+
+                Apartamenty ap_old = db.Apartamenty.Find(ap_new.IdApartamentu);
+
+                if (ap_old.IdWlasciciel != User.Identity.GetUserId())
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+                }
+
+                ap_old.Cena = ap_new.Cena;
+                ap_old.IloscOsob = ap_new.IloscOsob;
+                ap_old.KodPocztowy = ap_new.KodPocztowy;
+                ap_old.Miasto = ap_new.Miasto;
+                ap_old.Nazwa = ap_new.Nazwa;
+                ap_old.Opis = ap_new.Opis;
+                ap_old.Ulica = ap_new.Ulica;
+                ap_old.IdWlasciciel = User.Identity.GetUserId();
                 db.SaveChanges();
-                return RedirectToAction("Index");
+
+                List<UdogodnieniaApartamenty> udogodnieniaApartamentyOld = db.UdogodnieniaApartamenty
+                    .Where(x => x.IdApartamentu == ap_new.IdApartamentu).ToList();
+                db.UdogodnieniaApartamenty.RemoveRange(udogodnieniaApartamentyOld);
+
+                List<UdogodnieniaApartamenty> udogodnieniaApartamenty = new List<UdogodnieniaApartamenty>();
+
+                foreach (var u in model.WybraneUdogodeniniaIds)
+                {
+                    db.UdogodnieniaApartamenty.Add(new UdogodnieniaApartamenty()
+                    {
+                        IdApartamentu = ap_new.IdApartamentu,
+                        IdUdogodnienia = u
+                    });
+                }
+
+                db.SaveChanges();
+                return RedirectToAction("MojeApartamenty");
             }
-            return View(apartamenty);
+
+            model.WszystkieUdogodnienia = db.Udogodnienia.ToList();
+
+            if (model.WybraneUdogodeniniaIds == null)
+                model.WybraneUdogodeniniaIds = new int[] { };
+            else
+                model.WybraneUdogodnienia = db.Udogodnienia.ToList()
+                    .Where(x => model.WybraneUdogodeniniaIds.Contains(x.IdUdogodnienia)).ToList();
+
+            return View(model);
         }
 
         // GET: Apartamenty/Delete/5
@@ -109,12 +201,20 @@ namespace HotelMVC.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Apartamenty apartamenty = db.Apartamenty.Find(id);
-            if (apartamenty == null)
+
+            Apartamenty apartament =
+                db.Apartamenty
+                .Include("UdogodnieniaApartamenty.Udogodnienie")
+                .First(x => x.IdApartamentu == id);
+
+            if (apartament == null)
             {
                 return HttpNotFound();
             }
-            return View(apartamenty);
+
+            ApartamentyDisplayViewModel ap = new ApartamentyDisplayViewModel(apartament);
+
+            return View(ap);
         }
 
         // POST: Apartamenty/Delete/5

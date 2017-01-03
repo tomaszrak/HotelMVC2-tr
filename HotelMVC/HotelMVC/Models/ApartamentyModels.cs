@@ -8,6 +8,14 @@ using System.Web;
 
 namespace HotelMVC.Models
 {
+    public class ApartamentyEditViewModel
+    {
+        public Apartamenty Apartament { get; set; }
+        public List<Udogodnienia> WszystkieUdogodnienia { get; set; }
+        public List<Udogodnienia> WybraneUdogodnienia { get; set; }
+        public int[] WybraneUdogodeniniaIds { get; set; }
+    }
+
     public class ApartamentyDisplayViewModel : Apartamenty
     {
         public ApartamentyDisplayViewModel()

@@ -79,8 +79,11 @@
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.IdApartamentu }) |
-                @Html.ActionLink("Details", "Details", new { id = item.IdApartamentu }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.IdApartamentu })
+                @Html.ActionLink("Details", "Details", new { id = item.IdApartamentu })
+                @if (item.Wizyty == null || !item.Wizyty.Any())
+                {
+                    <text>| @Html.ActionLink("Delete", "Delete", new { id = item.IdApartamentu })</text>
+                }
             </td>
         </tr>
     }

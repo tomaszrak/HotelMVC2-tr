@@ -11,6 +11,7 @@ namespace HotelMVC.Migrations
         {
             AutomaticMigrationsEnabled = true;
             AutomaticMigrationDataLossAllowed = false;
+            ContextKey = "HotelMVC.Models.ApplicationDbContext";
         }
 
         protected override void Seed(HotelMVC.Models.ApplicationDbContext context)

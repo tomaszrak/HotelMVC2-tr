@@ -1,4 +1,4 @@
-﻿@model HotelMVC.Models.Apartamenty
+﻿@model HotelMVC.Models.ApartamentyDisplayViewModel
 
 @{
     ViewBag.Title = "Details";
@@ -43,6 +43,30 @@
         </dd>
 
         <dt>
+            @Html.DisplayNameFor(model => model.Udogodnienia)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Udogodnienia)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IloscWizyt)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IloscWizyt)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Ocena)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Ocena)
+        </dd>
+
+        <dt>
             @Html.DisplayNameFor(model => model.Ulica)
         </dt>
 
@@ -66,17 +90,9 @@
             @Html.DisplayFor(model => model.KodPocztowy)
         </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.IdWlasciciel)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.IdWlasciciel)
-        </dd>
-
     </dl>
 </div>
 <p>
     @Html.ActionLink("Edit", "Edit", new { id = Model.IdApartamentu }) |
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Back to List", "MojeApartamenty")
 </p>

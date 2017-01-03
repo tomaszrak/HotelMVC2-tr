@@ -1,4 +1,4 @@
-﻿@model HotelMVC.Models.Apartamenty
+﻿@model HotelMVC.Models.ApartamentyDisplayViewModel
 
 @{
     ViewBag.Title = "Delete";
@@ -44,6 +44,14 @@
         </dd>
 
         <dt>
+            @Html.DisplayNameFor(model => model.Udogodnienia)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Udogodnienia)
+        </dd>
+
+        <dt>
             @Html.DisplayNameFor(model => model.Ulica)
         </dt>
 
@@ -67,14 +75,6 @@
             @Html.DisplayFor(model => model.KodPocztowy)
         </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.IdWlasciciel)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.IdWlasciciel)
-        </dd>
-
     </dl>
 
     @using (Html.BeginForm()) {
@@ -82,7 +82,7 @@
 
         <div class="form-actions no-color">
             <input type="submit" value="Delete" class="btn btn-default" /> |
-            @Html.ActionLink("Back to List", "Index")
+            @Html.ActionLink("Back to List", "MojeApartamenty")
         </div>
     }
 </div>

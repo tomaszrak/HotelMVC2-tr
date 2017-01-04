@@ -66,4 +66,5 @@ C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\bin\Mi
 C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\bin\Microsoft.Owin.Security.MicrosoftAccount.xml
 C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\obj\Debug\HotelMVC.dll
 C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\obj\Debug\HotelMVC.pdb
-C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\obj\Debug\HotelMVC.csprojResolveAssemblyReference.cache
+C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\bin\LinqKit.dll
+C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\bin\LinqKit.xml

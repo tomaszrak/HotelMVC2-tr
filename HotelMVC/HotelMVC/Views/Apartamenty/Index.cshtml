@@ -1,73 +1,105 @@
-﻿@model IEnumerable<HotelMVC.Models.Apartamenty>
+﻿@model HotelMVC.Models.ApartamentyFilterViewModel
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Wyszukiwanie apartamentów";
 }
 
-<h2>Index</h2>
+@section scripts {
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Nazwa)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Cena)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.IloscOsob)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Opis)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Ulica)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Miasto)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.KodPocztowy)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.IdWlasciciel)
-        </th>
-        <th></th>
-    </tr>
+    <script type="text/javascript">
+        $(function () {
+            var minshowdate = new Date(@(DateTime.Now.AddMonths(-1).Year),
+                           @(DateTime.Now.AddMonths(-1).Month ),
+                           @(DateTime.Now.AddMonths(-1).Day));
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Nazwa)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Cena)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.IloscOsob)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Opis)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Ulica)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Miasto)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.KodPocztowy)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.IdWlasciciel)
-        </td>
-        <td>
-            @Html.ActionLink("Rezerwuj", "Rezerwuj", new { id=item.IdApartamentu })
-        </td>
-    </tr>
+            $(".datepicker").datepicker({ dateFormat: 'mm-dd-yy', minDate: minshowdate });
+        });
+    </script>
+
 }
 
-</table>
+<h2>ViewBag.Title</h2>
+
+@using (Html.BeginForm())
+{
+    <div class="jumbotron">
+        <div class="form-horizontal">
+            <table style="width:100%">
+                <tr>
+                    <td style="width:50%">
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.IleOsob, htmlAttributes: new { @class = "control-label col-md-2", @style = "font-size:15px; font-weight:bold" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.IleOsob, new { htmlAttributes = new { @class = "form-control" } })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CenaOd, htmlAttributes: new { @class = "control-label col-md-2", @style = "font-size:15px; font-weight:bold" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.CenaOd, new { htmlAttributes = new { @class = "form-control" } })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CenaDo, htmlAttributes: new { @class = "control-label col-md-2", @style = "font-size:15px; font-weight:bold" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.CenaDo, new { htmlAttributes = new { @class = "form-control" } })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Miasto, new { @class = "col-md-2 control-label", @style = "font-size:15px; font-weight:bold" })
+                            <div class="col-md-10">
+                                @Html.DropDownListFor(m => m.Miasto, (IEnumerable<SelectListItem>)ViewData["MiastaList"], new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.DataOd, new { @class = "col-md-2 control-label", @style = "font-size:15px; font-weight:bold" })
+                            <div class="col-md-10">
+                                @Html.TextBoxFor(model => model.DataOd, "{0:MM-dd-yyyy}", new { @class = "form-control datepicker" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.DataDo, new { @class = "col-md-2 control-label", @style = "font-size:15px; font-weight:bold" })
+                            <div class="col-md-10">
+                                @Html.TextBoxFor(model => model.DataDo, "{0:MM-dd-yyyy}", new { @class = "form-control datepicker" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-10" style="margin:15px">
+                                <input type="submit" class="btn btn-default" value="Szukaj" />
+                            </div>
+                        </div>
+                    </td>
+                    <td style="width:50%">
+                        <div class="form-group" style="margin-top:-85px">
+                            @Html.LabelFor(model => model.WybraneUdogodeniniaIds, htmlAttributes: new { @class = "control-label col-md-2", @style = "font-size:15px; font-weight:bold" })
+                        </div>
+                        <div class="col-md-10" style="margin-top:-30px">
+                            <ul style="font-size:15px; font-weight:bold">
+                                @foreach (var g in (List<HotelMVC.Models.Udogodnienia>)ViewData["UdogodnieniaList"])
+                                {
+                                    <li>
+                                        <input type="checkbox"
+                                               name="WybraneUdogodeniniaIds"
+                                               value="@g.IdUdogodnienia" id="@g.IdUdogodnienia"
+                                               @{if (Model.WybraneUdogodeniniaIds.Contains(g.IdUdogodnienia)) { <text> checked='checked' </text>                                  } } />
+                                        <label for="@g.IdUdogodnienia" style="font-size:15px; font-weight:bold">@g.Nazwa</label>
+                                    </li>
+    }
+                            </ul>
+                        </div>
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    @Html.Action("ApartamentyLista", new { filtr = Model })
+    }

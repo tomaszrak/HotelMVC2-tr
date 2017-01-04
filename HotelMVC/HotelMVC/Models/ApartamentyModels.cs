@@ -16,6 +16,29 @@ namespace HotelMVC.Models
         public int[] WybraneUdogodeniniaIds { get; set; }
     }
 
+    public class ApartamentyFilterViewModel
+    {
+        public string Miasto { get; set; }
+
+        [Display(Name = "Udogodnienia")]
+        public int[] WybraneUdogodeniniaIds { get; set; }
+
+        [Display(Name = "Ilość osób")]
+        public int? IleOsob { get; set; }
+
+        [Display(Name = "Cena od")]
+        public decimal? CenaOd { get; set; }
+        [Display(Name = "Cena do")]
+        public decimal? CenaDo { get; set; }
+
+        [Display(Name = "Data od")]
+        [DataType(DataType.Date)]
+        public DateTime DataOd { get; set; }
+        [Display(Name = "Data do")]
+        [DataType(DataType.Date)]
+        public DateTime DataDo { get; set; }
+    }
+
     public class ApartamentyDisplayViewModel : Apartamenty
     {
         public ApartamentyDisplayViewModel()

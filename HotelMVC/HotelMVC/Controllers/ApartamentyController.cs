@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using HotelMVC.Models;
 using Microsoft.AspNet.Identity;
+using LinqKit;
 
 namespace HotelMVC.Controllers
 {
@@ -18,7 +19,38 @@ namespace HotelMVC.Controllers
         // GET: Apartamenty
         public ActionResult Index()
         {
-            return View(db.Apartamenty.ToList());
+            var lista = new List<SelectListItem>();
+            lista.Add(new SelectListItem() { Value = "", Text = "---" });
+            var rez = db.Apartamenty.Select(x => x.Miasto).Distinct().ToList().Select(m => new SelectListItem() { Value = m, Text = m }).ToList();
+            lista.AddRange(rez);
+
+            ViewData["MiastaList"] = lista;
+            ViewData["UdogodnieniaList"] = db.Udogodnienia.ToList();
+
+            var model = new ApartamentyFilterViewModel()
+            {
+                WybraneUdogodeniniaIds = new int[] { },
+                DataDo = DateTime.Today,
+                DataOd = DateTime.Today
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public ActionResult Index(ApartamentyFilterViewModel model)
+        {
+            var lista = new List<SelectListItem>();
+            lista.Add(new SelectListItem() { Value = "", Text = "---" });
+            var rez = db.Apartamenty.Select(x => x.Miasto).Distinct().ToList().Select(m => new SelectListItem() { Value = m, Text = m }).ToList();
+            lista.AddRange(rez);
+
+            ViewData["MiastaList"] = lista;
+            ViewData["UdogodnieniaList"] = db.Udogodnienia.ToList();
+
+            if (model.WybraneUdogodeniniaIds == null) model.WybraneUdogodeniniaIds = new int[] { };
+
+            return View(model);
         }
 
         public ActionResult MojeApartamenty()
@@ -235,6 +267,39 @@ namespace HotelMVC.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        [ChildActionOnly]
+        public ActionResult ApartamentyLista(ApartamentyFilterViewModel filtr)
+        {
+            var predicate1 = PredicateBuilder.New<Apartamenty>(true);
+
+            if (!String.IsNullOrEmpty(filtr.Miasto)) { predicate1 = predicate1.And(a => a.Miasto == filtr.Miasto); }
+            if (filtr.CenaOd.HasValue && filtr.CenaOd != 0) { predicate1 = predicate1.And(a => a.Cena >= filtr.CenaOd); }
+            if (filtr.CenaDo.HasValue && filtr.CenaDo != 0) { predicate1 = predicate1.And(a => a.Cena <= filtr.CenaDo); }
+            if (filtr.IleOsob.HasValue && filtr.IleOsob != 0) { predicate1 = predicate1.And(a => a.IloscOsob == filtr.IleOsob); }
+
+            var predicate2 = PredicateBuilder.New<Apartamenty>(true);
+            predicate2 = predicate2.And(a => a.Wizyty == null || !a.Wizyty.Any(w => !(w.DataOd > filtr.DataDo || w.DataDo < filtr.DataOd)));
+
+            if (filtr.WybraneUdogodeniniaIds != null)
+                foreach (var item in filtr.WybraneUdogodeniniaIds)
+                {
+                    predicate2 = predicate2.And(a => a.UdogodnieniaApartamenty != null && a.UdogodnieniaApartamenty.Any(x => x.IdUdogodnienia == item));
+                }
+
+            var result = db.Apartamenty.Where(predicate1)
+                .Include("Wizyty")
+                .Include("UdogodnieniaApartamenty.Udogodnienie").ToList()
+                .Where(predicate2)
+                .Select(a => new ApartamentyDisplayViewModel(a));
+
+            if (result.Any())
+            {
+                result = result.OrderByDescending(x => x.Ocena).ThenBy(y => y.Nazwa).ToList();
+            }
+
+            return PartialView("_ApartamentyLista", result);
         }
     }
 }

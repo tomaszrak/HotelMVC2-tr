@@ -21,6 +21,29 @@ namespace HotelMVC.Models
         [Required(ErrorMessage = "Pole 'Uprawnienie' jest wymagane")]
         public int Uprawnienie { get; set; }
 
+        [Display(Name = "Uprawnienie")]
+        public string UprawnienieString
+        {
+            get
+            {
+                string rez = string.Empty;
+
+                switch (this.Uprawnienie)
+                {
+                    case 1:
+                        rez = "Administrator"; break;
+                    case 2:
+                        rez = "Właściciel"; break;
+                    case 3:
+                        rez = "Użytkownik"; break;
+                    default:
+                        break;
+                }
+
+                return rez;
+            }
+        }
+
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType

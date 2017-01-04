@@ -10,6 +10,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using HotelMVC.Models;
 using System.Collections.Generic;
+using System.Net;
 
 namespace HotelMVC.Controllers
 {
@@ -51,6 +52,11 @@ namespace HotelMVC.Controllers
             {
                 _userManager = value;
             }
+        }
+
+        public ActionResult UserList(string returnUrl)
+        {
+            return View(UserManager.Users);
         }
 
         //
@@ -140,13 +146,6 @@ namespace HotelMVC.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
-            ViewData["UprawnieniaList"] = new List<SelectListItem>()
-            {
-                new SelectListItem() {Value = "1", Text = "Admin" },
-                new SelectListItem() {Value = "2", Text = "Właściciel" },
-                new SelectListItem() {Value = "3", Text = "Użytkownik" }
-            };
-
             return View();
         }
 
@@ -159,12 +158,104 @@ namespace HotelMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, Name = model.Imie, Surname = model.Nazwisko, Uprawnienie = 1 };
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, Name = model.Imie, Surname = model.Nazwisko, Uprawnienie = 3 };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
                     return RedirectToAction("Index", "Home");
+                }
+                AddErrors(result);
+            }
+
+            return View(model);
+        }
+
+        [AllowAnonymous]
+        public ActionResult Create()
+        {
+            ViewData["UprawnieniaList"] = new List<SelectListItem>()
+            {
+                new SelectListItem() {Value = "1", Text = "Admin" },
+                new SelectListItem() {Value = "2", Text = "Właściciel" },
+                new SelectListItem() {Value = "3", Text = "Użytkownik" }
+            };
+
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Create(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, Name = model.Imie, Surname = model.Nazwisko, Uprawnienie = model.Uprawnienie };
+                var result = await UserManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("UserList", "Account");
+                }
+                AddErrors(result);
+            }
+
+            // If we got this far, something failed, redisplay form
+            ViewData["UprawnieniaList"] = new List<SelectListItem>()
+            {
+                new SelectListItem() {Value = "1", Text = "Admin" },
+                new SelectListItem() {Value = "2", Text = "Właściciel" },
+                new SelectListItem() {Value = "3", Text = "Użytkownik" }
+            };
+
+            return View(model);
+        }
+
+        [AllowAnonymous]
+        public ActionResult Edit(string id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var user = UserManager.FindById(id);
+
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+
+            ViewData["UprawnieniaList"] = new List<SelectListItem>()
+            {
+                new SelectListItem() {Value = "1", Text = "Admin" },
+                new SelectListItem() {Value = "2", Text = "Właściciel" },
+                new SelectListItem() {Value = "3", Text = "Użytkownik" }
+            };
+
+            var model = new EditUserViewModel() { Id = user.Id, Imie = user.Name, Nazwisko = user.Surname, Uprawnienie = user.Uprawnienie, Email = user.Email };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit(EditUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = UserManager.FindById(model.Id);
+
+                user.Email = user.UserName = model.Email;
+                user.Name = model.Imie;
+                user.Surname = model.Nazwisko;
+                user.Uprawnienie = model.Uprawnienie;
+
+                var result = await UserManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("UserList", "Account");
                 }
                 AddErrors(result);
             }
@@ -409,6 +500,32 @@ namespace HotelMVC.Controllers
         public ActionResult ExternalLoginFailure()
         {
             return View();
+        }
+
+        public ActionResult Delete(string id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var user = UserManager.FindById(id);
+
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View(user);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteConfirmed(string id)
+        {
+            UserManager.Delete(UserManager.FindById(id));
+
+            return RedirectToAction("UserList");
         }
 
         protected override void Dispose(bool disposing)

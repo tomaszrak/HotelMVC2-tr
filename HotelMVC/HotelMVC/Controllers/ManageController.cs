@@ -52,7 +52,7 @@ namespace HotelMVC.Controllers
 
         //
         // GET: /Manage/Index
-        public async Task<ActionResult> Index(ManageMessageId? message)
+        public ActionResult Index(ManageMessageId? message)
         {
             ViewBag.StatusMessage =
                 message == ManageMessageId.ChangePasswordSuccess ? "Your password has been changed."
@@ -63,16 +63,34 @@ namespace HotelMVC.Controllers
                 : message == ManageMessageId.RemovePhoneSuccess ? "Your phone number was removed."
                 : "";
 
-            var userId = User.Identity.GetUserId();
+            var user = UserManager.FindById(User.Identity.GetUserId());
             var model = new IndexViewModel
             {
+                Imie = user.Name,
+                Nazwisko = user.Surname,
+                Email = user.Email,
                 HasPassword = HasPassword(),
-                PhoneNumber = await UserManager.GetPhoneNumberAsync(userId),
-                TwoFactor = await UserManager.GetTwoFactorEnabledAsync(userId),
-                Logins = await UserManager.GetLoginsAsync(userId),
-                BrowserRemembered = await AuthenticationManager.TwoFactorBrowserRememberedAsync(userId)
             };
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Index(IndexViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = UserManager.FindById(User.Identity.GetUserId());
+            user.Name = model.Imie;
+            user.Surname = model.Nazwisko;
+            user.Email = model.Email;
+
+            UserManager.Update(user);
+
+            return RedirectToAction("Index", "Home");
         }
 
         //

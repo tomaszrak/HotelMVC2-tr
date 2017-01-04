@@ -91,6 +91,26 @@ namespace HotelMVC.Models
         public int Uprawnienie { get; set; }
     }
 
+    public class EditUserViewModel
+    {
+        public string Id { get; set; }
+
+        [Display(Name = "Imię")]
+        public string Imie { get; set; }
+
+        [Display(Name = "Nazwisko")]
+        public string Nazwisko { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Required]
+        [Display(Name = "Uprawnienie")]
+        public int Uprawnienie { get; set; }
+    }
+
     public class ResetPasswordViewModel
     {
         [Required]

@@ -444,6 +444,50 @@ namespace HotelMVC.Controllers
             return RedirectToAction("MojeWizyty");
         }
 
+        [ChildActionOnly]
+        public ActionResult Odpowiedz(int Id)
+        {
+            if (Id == 0)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            Wizyty wiz = db.Wizyty.Include("Apartament").ToList().First(w => w.IdWizyty == Id);
+
+            if (wiz == null)
+            {
+                return HttpNotFound();
+            }
+
+            WizytyDisplayViewModel rez = new WizytyDisplayViewModel(wiz);
+
+
+            return PartialView("_Odpowiedz", rez);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Odpowiedz(WizytyDisplayViewModel model)
+        {
+            if (model.IdWizyty == 0)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            Wizyty wiz = db.Wizyty.Include("Apartament").ToList().First(w => w.IdWizyty == model.IdWizyty);
+
+            if (wiz == null)
+            {
+                return HttpNotFound();
+            }
+
+            wiz.Odpowiedz = model.Odpowiedz;
+
+            db.SaveChanges();
+
+            return RedirectToAction("Details", "Apartamenty", new { id = wiz.IdApartamentu });
+        }
+
         public string DateTimeToString(DateTime date)
         {
             return date.ToString("MM-dd-yyyy");

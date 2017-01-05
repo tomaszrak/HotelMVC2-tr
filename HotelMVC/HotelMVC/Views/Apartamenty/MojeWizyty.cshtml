@@ -48,7 +48,7 @@
         <td>
             @if (String.IsNullOrEmpty(item.Komentarz))
                 {
-                    if ((item.DataDo < DateTime.Today) && (ViewData["idWizyty"] == null || (int)ViewData["idWizyty"] != item.IdWizyty))
+                    if (!(item.DataDo < DateTime.Today) && (ViewData["idWizyty"] == null || (int)ViewData["idWizyty"] != item.IdWizyty))
                     {
                     @Html.ActionLink("Dodaj komentarz", "MojeWizyty", new { Id = item.IdWizyty })
                 }

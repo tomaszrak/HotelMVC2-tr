@@ -37,6 +37,80 @@ namespace HotelMVC.Controllers
             return View(model);
         }
 
+        public ActionResult Apartament(int Id, string dataOd, string dataDo)
+        {
+            var ap = db.Apartamenty.Include("Wizyty").Include("UdogodnieniaApartamenty.Udogodnienie").First(x => x.IdApartamentu == Id);
+
+            var model = new ApartamentyReservationViewModel(ap)
+            {
+                DataOd = this.StringToDateTime(dataOd),
+                DataDo = this.StringToDateTime(dataDo),
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public ActionResult Apartament(ApartamentyReservationViewModel model)
+        {
+            var userId = User.Identity.GetUserId();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account",
+                    new
+                    {
+                        returnUrl = Request.Url.AbsolutePath + "?dataOd=" + this.DateTimeToString(model.DataOd) + "&dataDo=" + this.DateTimeToString(model.DataDo)
+                    });
+            }
+
+            var ap = db.Apartamenty.Include("UdogodnieniaApartamenty.Udogodnienie").First(x => x.IdApartamentu == model.IdApartamentu);
+
+            if (model.DataOd > model.DataDo)
+            {
+                ViewData["errorInfo"] = "Nie można zarezerwować apartamentu. Data od jest większa niż data do.";
+
+                model = new ApartamentyReservationViewModel(ap)
+                {
+                    DataOd = model.DataOd,
+                    DataDo = model.DataDo
+                };
+
+                return View(model);
+            }
+
+            if (db.Wizyty == null || !db.Wizyty.Any(w => w.IdApartamentu == model.IdApartamentu && !(w.DataOd > model.DataDo || w.DataDo < model.DataOd)))
+            {
+                if (ap.Wizyty == null)
+                    ap.Wizyty = new List<Wizyty>();
+
+                db.Wizyty.Add(new Wizyty()
+                {
+                    IdApartamentu = model.IdApartamentu,
+                    DataOd = model.DataOd,
+                    DataDo = model.DataDo,
+                    DataRezerwacji = DateTime.Today,
+                    IdKlient = userId
+                });
+
+                db.SaveChanges();
+
+                return RedirectToAction("MojeWizyty");
+            }
+            else
+            {
+                ViewData["errorInfo"] = "Nie można zarezerwować apartamentu. W dniach " + DateTimeToString(model.DataOd) + " - " + DateTimeToString(model.DataDo) + " jest on niedostępny.";
+
+                model = new ApartamentyReservationViewModel(ap)
+                {
+                    DataOd = model.DataOd,
+                    DataDo = model.DataDo
+                };
+
+                return View(model);
+            }
+        }
+
         [HttpPost]
         public ActionResult Index(ApartamentyFilterViewModel model)
         {
@@ -123,16 +197,15 @@ namespace HotelMVC.Controllers
                 db.Apartamenty.Add(ap);
                 db.SaveChanges();
 
-                List<UdogodnieniaApartamenty> udogodnieniaApartamenty = new List<UdogodnieniaApartamenty>();
-
-                foreach (var u in model.WybraneUdogodeniniaIds)
-                {
-                    db.UdogodnieniaApartamenty.Add(new UdogodnieniaApartamenty()
+                if (model.WybraneUdogodeniniaIds != null)
+                    foreach (var u in model.WybraneUdogodeniniaIds)
                     {
-                        IdApartamentu = ap.IdApartamentu,
-                        IdUdogodnienia = u
-                    });
-                }
+                        db.UdogodnieniaApartamenty.Add(new UdogodnieniaApartamenty()
+                        {
+                            IdApartamentu = ap.IdApartamentu,
+                            IdUdogodnienia = u
+                        });
+                    }
 
                 db.SaveChanges();
                 return RedirectToAction("MojeApartamenty");
@@ -200,16 +273,15 @@ namespace HotelMVC.Controllers
                     .Where(x => x.IdApartamentu == ap_new.IdApartamentu).ToList();
                 db.UdogodnieniaApartamenty.RemoveRange(udogodnieniaApartamentyOld);
 
-                List<UdogodnieniaApartamenty> udogodnieniaApartamenty = new List<UdogodnieniaApartamenty>();
-
-                foreach (var u in model.WybraneUdogodeniniaIds)
-                {
-                    db.UdogodnieniaApartamenty.Add(new UdogodnieniaApartamenty()
+                if (model.WybraneUdogodeniniaIds != null)
+                    foreach (var u in model.WybraneUdogodeniniaIds)
                     {
-                        IdApartamentu = ap_new.IdApartamentu,
-                        IdUdogodnienia = u
-                    });
-                }
+                        db.UdogodnieniaApartamenty.Add(new UdogodnieniaApartamenty()
+                        {
+                            IdApartamentu = ap_new.IdApartamentu,
+                            IdUdogodnienia = u
+                        });
+                    }
 
                 db.SaveChanges();
                 return RedirectToAction("MojeApartamenty");
@@ -257,7 +329,7 @@ namespace HotelMVC.Controllers
             Apartamenty apartamenty = db.Apartamenty.Find(id);
             db.Apartamenty.Remove(apartamenty);
             db.SaveChanges();
-            return RedirectToAction("Index");
+            return RedirectToAction("MojeApartamenty");
         }
 
         protected override void Dispose(bool disposing)
@@ -299,7 +371,20 @@ namespace HotelMVC.Controllers
                 result = result.OrderByDescending(x => x.Ocena).ThenBy(y => y.Nazwa).ToList();
             }
 
+            ViewData["dataOd"] = this.DateTimeToString(filtr.DataOd);
+            ViewData["dataDo"] = this.DateTimeToString(filtr.DataDo);
+
             return PartialView("_ApartamentyLista", result);
+        }
+
+        public string DateTimeToString(DateTime date)
+        {
+            return date.ToString("MM-dd-yyyy");
+        }
+
+        public DateTime StringToDateTime(string date)
+        {
+            return DateTime.ParseExact(date, "MM-dd-yyyy", System.Globalization.CultureInfo.CurrentCulture);
         }
     }
 }

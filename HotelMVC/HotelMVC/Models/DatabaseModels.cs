@@ -34,6 +34,8 @@ namespace HotelMVC.Models
 
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
         }
+
+        public System.Data.Entity.DbSet<HotelMVC.Models.ApartamentyReservationViewModel> Apartamenties { get; set; }
     }
 
     public class EntityInitializer : System.Data.Entity.DropCreateDatabaseIfModelChanges<EntityContext>

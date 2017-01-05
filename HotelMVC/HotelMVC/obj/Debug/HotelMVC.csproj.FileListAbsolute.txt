@@ -68,3 +68,4 @@ C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\obj\De
 C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\obj\Debug\HotelMVC.pdb
 C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\bin\LinqKit.dll
 C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\bin\LinqKit.xml
+C:\Users\marta.tyrka.PROFERIS\Documents\WiWLM\HotelMVC2\HotelMVC\HotelMVC\obj\Debug\HotelMVC.csprojResolveAssemblyReference.cache

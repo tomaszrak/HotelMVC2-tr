@@ -139,6 +139,21 @@ namespace HotelMVC.Controllers
             return View(ap);
         }
 
+        public ActionResult MojeWizyty(int? Id)
+        {
+            if (Id.HasValue)
+            {
+                ViewData["idWizyty"] = Id.Value;
+            }
+
+            List<WizytyDisplayViewModel> wiz =
+                db.Wizyty.Include("Apartament").ToList()
+                .Where(w => w.IdKlient == User.Identity.GetUserId())
+                .Select(w => new WizytyDisplayViewModel(w)).ToList();
+
+            return View(wiz);
+        }
+
         // GET: Apartamenty/Details/5
         public ActionResult Details(int? id, int? idWizyty)
         {
@@ -375,6 +390,58 @@ namespace HotelMVC.Controllers
             ViewData["dataDo"] = this.DateTimeToString(filtr.DataDo);
 
             return PartialView("_ApartamentyLista", result);
+        }
+
+        [ChildActionOnly]
+        public ActionResult Komentarz(int Id)
+        {
+            if (Id == 0)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            Wizyty wiz = db.Wizyty.Include("Apartament").ToList().First(w => w.IdWizyty == Id);
+
+            if (wiz == null)
+            {
+                return HttpNotFound();
+            }
+
+            WizytyDisplayViewModel rez = new WizytyDisplayViewModel(wiz);
+
+            ViewData["OcenaList"] = new List<SelectListItem>()
+            {
+                new SelectListItem() {Value = "5", Text = "5" },
+                new SelectListItem() {Value = "4", Text = "4" },
+                new SelectListItem() {Value = "3", Text = "3" },
+                new SelectListItem() {Value = "2", Text = "2" },
+                new SelectListItem() {Value = "1", Text = "1" },
+        };
+
+            return PartialView("_Komentarz", rez);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Komentarz(WizytyDisplayViewModel model)
+        {
+            if (model.IdWizyty == 0)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            Wizyty wiz = db.Wizyty.Include("Apartament").ToList().First(w => w.IdWizyty == model.IdWizyty);
+
+            if (wiz == null)
+            {
+                return HttpNotFound();
+            }
+
+            wiz.Komentarz = model.Komentarz;
+            wiz.Ocena = model.Ocena;
+
+            db.SaveChanges();
+            return RedirectToAction("MojeWizyty");
         }
 
         public string DateTimeToString(DateTime date)

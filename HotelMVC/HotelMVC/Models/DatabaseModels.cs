@@ -36,6 +36,8 @@ namespace HotelMVC.Models
         }
 
         public System.Data.Entity.DbSet<HotelMVC.Models.ApartamentyReservationViewModel> Apartamenties { get; set; }
+
+        public System.Data.Entity.DbSet<HotelMVC.Models.WizytyDisplayViewModel> Wizyties { get; set; }
     }
 
     public class EntityInitializer : System.Data.Entity.DropCreateDatabaseIfModelChanges<EntityContext>

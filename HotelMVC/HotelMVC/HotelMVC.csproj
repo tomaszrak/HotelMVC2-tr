@@ -303,6 +303,8 @@
     <Content Include="Views\Account\Create.cshtml" />
     <Content Include="Views\Apartamenty\_ApartamentyLista.cshtml" />
     <Content Include="Views\Apartamenty\Apartament.cshtml" />
+    <Content Include="Views\Apartamenty\MojeWizyty.cshtml" />
+    <Content Include="Views\Apartamenty\_Komentarz.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

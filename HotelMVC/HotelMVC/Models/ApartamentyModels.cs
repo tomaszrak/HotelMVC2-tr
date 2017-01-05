@@ -124,4 +124,36 @@ namespace HotelMVC.Models
         [DataType(DataType.Date)]
         public DateTime DataDo { get; set; }
     }
+
+    public class WizytyDisplayViewModel : Wizyty
+    {
+        public WizytyDisplayViewModel() { }
+
+        public WizytyDisplayViewModel(Wizyty w)
+        {
+            this.Apartament = w.Apartament;
+            this.DataDo = w.DataDo;
+            this.DataOd = w.DataOd;
+            this.DataRezerwacji = w.DataRezerwacji;
+            this.DataWplaty = w.DataWplaty;
+            this.IdApartamentu = w.IdApartamentu;
+            this.IdKlient = w.IdKlient;
+            this.IdWizyty = w.IdWizyty;
+            this.Komentarz = w.Komentarz;
+            this.Ocena = w.Ocena;
+            this.Odpowiedz = w.Odpowiedz;
+        }
+
+        [Display(Name = "Klient")]
+        public string KlientImieNazwisko
+        {
+            get
+            {
+                var store = new UserStore<ApplicationUser>(new ApplicationDbContext());
+                var userManager = new UserManager<ApplicationUser>(store);
+                ApplicationUser user = userManager.FindById(this.IdKlient);
+                return user.Name + " " + user.Surname;
+            }
+        }
+    }
 }

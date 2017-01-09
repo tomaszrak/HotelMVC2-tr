@@ -144,12 +144,20 @@ namespace HotelMVC.Models
         [DisplayFormat(DataFormatString = "{0:MM-dd-yyyy}")]
         public DateTime DataDo { get; set; }
 
+        public bool? Potwierdzona { get; set; }
+
         public string Komentarz { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:MM-dd-yyyy}")]
+        public DateTime? DataKomentarz { get; set; }
 
         public int Ocena { get; set; }
 
         [Display(Name = "Odpowiedź")]
         public string Odpowiedz { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:MM-dd-yyyy}")]
+        public DateTime? DataOdpowiedz { get; set; }
 
         [MaxLength(128)]
         public string IdKlient { get; set; }

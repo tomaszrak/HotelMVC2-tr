@@ -93,7 +93,7 @@ namespace HotelMVC.Models
                 if (this.Wizyty == null)
                     return 0;
                 else
-                    return this.Wizyty.Count(w => w.DataDo < DateTime.Today);
+                    return this.Wizyty.Count(w => w.DataDo < DateTime.Today && w.Potwierdzona == true);
             }
         }
 
@@ -136,12 +136,26 @@ namespace HotelMVC.Models
             this.DataOd = w.DataOd;
             this.DataRezerwacji = w.DataRezerwacji;
             this.DataWplaty = w.DataWplaty;
+            this.DataKomentarz = w.DataKomentarz;
+            this.DataOdpowiedz = w.DataOdpowiedz;
             this.IdApartamentu = w.IdApartamentu;
             this.IdKlient = w.IdKlient;
             this.IdWizyty = w.IdWizyty;
             this.Komentarz = w.Komentarz;
             this.Ocena = w.Ocena;
             this.Odpowiedz = w.Odpowiedz;
+            this.Potwierdzona = w.Potwierdzona;
+        }
+
+        [Display(Name = "Potwierdzona")]
+        public string PotwierdzonaString
+        {
+            get
+            {
+                if (this.Potwierdzona == true) return "Tak";
+                else if (this.Potwierdzona == false) return "Nie";
+                else return "Oczekuje";
+            }
         }
 
         [Display(Name = "Klient")]

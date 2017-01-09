@@ -110,7 +110,7 @@
             <hr />
 
             var wiz = new HotelMVC.Models.WizytyDisplayViewModel(item);
-            <i>@wiz.KlientImieNazwisko (wizyta @wiz.DataOd.ToShortDateString() - @wiz.DataDo.ToShortDateString()) skomentował(a):</i>
+            <i>@wiz.KlientImieNazwisko (wizyta @wiz.DataOd.ToShortDateString() - @wiz.DataDo.ToShortDateString()) skomentował(a) (@Html.DisplayFor(modelItem => item.DataKomentarz)):</i>
             <p>
                 <b>Ocena:</b> @wiz.Ocena
             </p>
@@ -132,7 +132,7 @@
                 else
                 {
 
-                    <i> Odpowiedź właściciela:</i>
+                    <i> Odpowiedź właściciela (@Html.DisplayFor(modelItem => item.DataOdpowiedz)):</i>
                     <p>
                         @Html.DisplayFor(modelItem => item.Odpowiedz)
                     </p>

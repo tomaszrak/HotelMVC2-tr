@@ -136,6 +136,11 @@ namespace HotelMVC.Controllers
                 .Where(a => a.IdWlasciciel == User.Identity.GetUserId())
                 .Select(a => new ApartamentyDisplayViewModel(a)).ToList();
 
+            if (ap.SelectMany(a => a.Wizyty).Any(w => w.Potwierdzona == null))
+            {
+                ViewData["Oczekuje"] = ap.SelectMany(a => a.Wizyty).Count(w => w.Potwierdzona == null);
+            }
+
             return View(ap);
         }
 
@@ -152,6 +157,63 @@ namespace HotelMVC.Controllers
                 .Select(w => new WizytyDisplayViewModel(w)).ToList();
 
             return View(wiz);
+        }
+
+        public ActionResult MojeApartamentyWizyty(int? Id)
+        {
+            if (Id.HasValue)
+            {
+                ViewData["idWizyty"] = Id.Value;
+            }
+
+            List<WizytyDisplayViewModel> wiz =
+                db.Wizyty.Include("Apartament").ToList()
+                .Where(w => w.Apartament.IdWlasciciel == User.Identity.GetUserId())
+                .OrderBy(x => x.Potwierdzona)
+                .ThenBy(y => y.DataOd)
+                .Select(w => new WizytyDisplayViewModel(w)).ToList();
+
+            return View(wiz);
+        }
+
+        public ActionResult Potwierdz(int? Id)
+        {
+            if (Id == 0)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            Wizyty wiz = db.Wizyty.Include("Apartament").ToList().First(w => w.IdWizyty == Id);
+
+            if (wiz == null)
+            {
+                return HttpNotFound();
+            }
+
+            wiz.Potwierdzona = true;
+            db.SaveChanges();
+
+            return RedirectToAction("MojeApartamentyWizyty");
+        }
+
+        public ActionResult Odrzuc(int? Id)
+        {
+            if (Id == 0)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            Wizyty wiz = db.Wizyty.Include("Apartament").ToList().First(w => w.IdWizyty == Id);
+
+            if (wiz == null)
+            {
+                return HttpNotFound();
+            }
+
+            wiz.Potwierdzona = false;
+            db.SaveChanges();
+
+            return RedirectToAction("MojeApartamentyWizyty");
         }
 
         // GET: Apartamenty/Details/5
@@ -367,7 +429,7 @@ namespace HotelMVC.Controllers
             if (filtr.IleOsob.HasValue && filtr.IleOsob != 0) { predicate1 = predicate1.And(a => a.IloscOsob == filtr.IleOsob); }
 
             var predicate2 = PredicateBuilder.New<Apartamenty>(true);
-            predicate2 = predicate2.And(a => a.Wizyty == null || !a.Wizyty.Any(w => !(w.DataOd > filtr.DataDo || w.DataDo < filtr.DataOd)));
+            predicate2 = predicate2.And(a => a.Wizyty == null || !a.Wizyty.Any(w => w.Potwierdzona != false && !(w.DataOd > filtr.DataDo || w.DataDo < filtr.DataOd)));
 
             if (filtr.WybraneUdogodeniniaIds != null)
                 foreach (var item in filtr.WybraneUdogodeniniaIds)
@@ -438,6 +500,7 @@ namespace HotelMVC.Controllers
             }
 
             wiz.Komentarz = model.Komentarz;
+            wiz.DataKomentarz = DateTime.Now;
             wiz.Ocena = model.Ocena;
 
             db.SaveChanges();
@@ -482,10 +545,11 @@ namespace HotelMVC.Controllers
             }
 
             wiz.Odpowiedz = model.Odpowiedz;
+            wiz.DataOdpowiedz = DateTime.Now;
 
             db.SaveChanges();
 
-            return RedirectToAction("Details", "Apartamenty", new { id = wiz.IdApartamentu });
+            return RedirectToAction("Details", "Apartamenty");
         }
 
         public string DateTimeToString(DateTime date)

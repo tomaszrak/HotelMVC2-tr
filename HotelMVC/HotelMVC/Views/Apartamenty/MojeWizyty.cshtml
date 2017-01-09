@@ -24,67 +24,78 @@
             @Html.DisplayNameFor(model => model.DataDo)
         </th>
         <th>
+            @Html.DisplayNameFor(model => model.PotwierdzonaString)
+        </th>
+        <th>
             @Html.DisplayNameFor(model => model.Komentarz)
         </th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Apartament.Nazwa)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DataRezerwacji)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DataWplaty)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DataOd)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DataDo)
-        </td>
-        <td>
-            @if (String.IsNullOrEmpty(item.Komentarz))
-                {
-                    if (!(item.DataDo < DateTime.Today) && (ViewData["idWizyty"] == null || (int)ViewData["idWizyty"] != item.IdWizyty))
-                    {
-                    @Html.ActionLink("Dodaj komentarz", "MojeWizyty", new { Id = item.IdWizyty })
-                }
-            }
-            else
-            {
-                if (item.Ocena != 0)
-                {
-                    <p>
-                        <b> Ocena:</b> @Html.DisplayFor(modelItem => item.Ocena)
-                    </p>
-                }
-
-                <b>Komentarz:</b> @Html.DisplayFor(modelItem => item.Komentarz)
-
-                if (!String.IsNullOrEmpty(item.Odpowiedz))
-                {
-                    <div style="margin-left:20px">
-                        <i> Odpowiedź właściciela:</i>
-                        <p>
-                            @Html.DisplayFor(modelItem => item.Odpowiedz)
-                        </p>
-                    </div>
-                }
-            }
-        </td>
-    </tr>
-
-    if (String.IsNullOrEmpty(item.Komentarz) && ViewData["idWizyty"] != null && (int)ViewData["idWizyty"] == item.IdWizyty)
+    @foreach (var item in Model)
     {
         <tr>
-            <td colspan="6">
-                @Html.Action("Komentarz", new { id = item.IdWizyty })
+            <td>
+                @Html.DisplayFor(modelItem => item.Apartament.Nazwa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DataRezerwacji)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DataWplaty)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DataOd)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DataDo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PotwierdzonaString)
+            </td>
+            <td>
+                @if (String.IsNullOrEmpty(item.Komentarz))
+                {
+                    var wizytaZakonczona = item.DataDo < DateTime.Today;
+                    var wizytaOdrzucona = item.Potwierdzona == false;
+
+
+                    if ((wizytaZakonczona || wizytaOdrzucona) && (ViewData["idWizyty"] == null || (int)ViewData["idWizyty"] != item.IdWizyty))
+                    {
+                        @Html.ActionLink("Dodaj komentarz", "MojeWizyty", new { Id = item.IdWizyty })
+                    }
+                }
+                else
+                {
+                    if (item.Ocena != 0)
+                    {
+                        <p>
+                            <b> Ocena:</b> @Html.DisplayFor(modelItem => item.Ocena)
+                        </p>
+                    }
+
+                    <b>Komentarz:</b> @Html.DisplayFor(modelItem => item.Komentarz)
+
+                    if (!String.IsNullOrEmpty(item.Odpowiedz))
+                    {
+                        <div style="margin-left:20px">
+                            <i> Odpowiedź właściciela (@Html.DisplayFor(modelItem => item.DataOdpowiedz)):</i>
+                            <p>
+                                @Html.DisplayFor(modelItem => item.Odpowiedz)
+                            </p>
+                        </div>
+                    }
+                }
             </td>
         </tr>
+
+        if (String.IsNullOrEmpty(item.Komentarz) && ViewData["idWizyty"] != null && (int)ViewData["idWizyty"] == item.IdWizyty)
+        {
+            <tr>
+                <td colspan="6">
+                    @Html.Action("Komentarz", new { id = item.IdWizyty })
+                </td>
+            </tr>
+        }
     }
-}
 
 </table>

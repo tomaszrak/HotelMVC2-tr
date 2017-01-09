@@ -9,13 +9,16 @@ using System.Web.Mvc;
 using HotelMVC.Models;
 using Microsoft.AspNet.Identity;
 using LinqKit;
+using HotelMVC.Infrastructure;
 
 namespace HotelMVC.Controllers
 {
+    [Authorize]
     public class ApartamentyController : Controller
     {
         private EntityContext db = new EntityContext();
 
+        [AllowAnonymous]
         // GET: Apartamenty
         public ActionResult Index()
         {
@@ -50,6 +53,7 @@ namespace HotelMVC.Controllers
             return View(model);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public ActionResult Apartament(ApartamentyReservationViewModel model)
         {
@@ -111,6 +115,7 @@ namespace HotelMVC.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public ActionResult Index(ApartamentyFilterViewModel model)
         {
@@ -127,6 +132,7 @@ namespace HotelMVC.Controllers
             return View(model);
         }
 
+        [WlascicielAuth]
         public ActionResult MojeApartamenty()
         {
             List<ApartamentyDisplayViewModel> ap =
@@ -159,6 +165,7 @@ namespace HotelMVC.Controllers
             return View(wiz);
         }
 
+        [WlascicielAuth]
         public ActionResult MojeApartamentyWizyty(int? Id)
         {
             if (Id.HasValue)
@@ -176,6 +183,7 @@ namespace HotelMVC.Controllers
             return View(wiz);
         }
 
+        [WlascicielAuth]
         public ActionResult Potwierdz(int? Id)
         {
             if (Id == 0)
@@ -190,12 +198,18 @@ namespace HotelMVC.Controllers
                 return HttpNotFound();
             }
 
+            if (wiz.Apartament.IdWlasciciel != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             wiz.Potwierdzona = true;
             db.SaveChanges();
 
             return RedirectToAction("MojeApartamentyWizyty");
         }
 
+        [WlascicielAuth]
         public ActionResult Odrzuc(int? Id)
         {
             if (Id == 0)
@@ -216,6 +230,7 @@ namespace HotelMVC.Controllers
             return RedirectToAction("MojeApartamentyWizyty");
         }
 
+        [WlascicielAuth]
         // GET: Apartamenty/Details/5
         public ActionResult Details(int? id, int? idWizyty)
         {
@@ -240,11 +255,17 @@ namespace HotelMVC.Controllers
                 return HttpNotFound();
             }
 
+            if (apartament.IdWlasciciel != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             ApartamentyDisplayViewModel ap = new ApartamentyDisplayViewModel(apartament);
 
             return View(ap);
         }
 
+        [WlascicielAuth]
         // GET: Apartamenty/Create
         public ActionResult Create()
         {
@@ -259,9 +280,7 @@ namespace HotelMVC.Controllers
             return View(model);
         }
 
-        // POST: Apartamenty/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [WlascicielAuth]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(ApartamentyEditViewModel model)
@@ -293,7 +312,7 @@ namespace HotelMVC.Controllers
             return View(model);
         }
 
-        // GET: Apartamenty/Edit/5
+        [WlascicielAuth]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -304,6 +323,11 @@ namespace HotelMVC.Controllers
             if (apartamenty == null)
             {
                 return HttpNotFound();
+            }
+
+            if (apartamenty.IdWlasciciel != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
             }
 
             ApartamentyEditViewModel model = new ApartamentyEditViewModel()
@@ -318,9 +342,7 @@ namespace HotelMVC.Controllers
             return View(model);
         }
 
-        // POST: Apartamenty/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [WlascicielAuth]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(ApartamentyEditViewModel model)
@@ -375,7 +397,7 @@ namespace HotelMVC.Controllers
             return View(model);
         }
 
-        // GET: Apartamenty/Delete/5
+        [WlascicielAuth]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -393,17 +415,28 @@ namespace HotelMVC.Controllers
                 return HttpNotFound();
             }
 
+            if (apartament.IdWlasciciel != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             ApartamentyDisplayViewModel ap = new ApartamentyDisplayViewModel(apartament);
 
             return View(ap);
         }
 
-        // POST: Apartamenty/Delete/5
+        [WlascicielAuth]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
             Apartamenty apartamenty = db.Apartamenty.Find(id);
+
+            if (apartamenty.IdWlasciciel != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             db.Apartamenty.Remove(apartamenty);
             db.SaveChanges();
             return RedirectToAction("MojeApartamenty");
@@ -418,6 +451,7 @@ namespace HotelMVC.Controllers
             base.Dispose(disposing);
         }
 
+        [AllowAnonymous]
         [ChildActionOnly]
         public ActionResult ApartamentyLista(ApartamentyFilterViewModel filtr)
         {
@@ -469,6 +503,11 @@ namespace HotelMVC.Controllers
                 return HttpNotFound();
             }
 
+            if (wiz.IdKlient != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             WizytyDisplayViewModel rez = new WizytyDisplayViewModel(wiz);
 
             ViewData["OcenaList"] = new List<SelectListItem>()
@@ -499,6 +538,11 @@ namespace HotelMVC.Controllers
                 return HttpNotFound();
             }
 
+            if (wiz.IdKlient != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             wiz.Komentarz = model.Komentarz;
             wiz.DataKomentarz = DateTime.Now;
             wiz.Ocena = model.Ocena;
@@ -507,6 +551,7 @@ namespace HotelMVC.Controllers
             return RedirectToAction("MojeWizyty");
         }
 
+        [WlascicielAuth]
         [ChildActionOnly]
         public ActionResult Odpowiedz(int Id)
         {
@@ -522,12 +567,18 @@ namespace HotelMVC.Controllers
                 return HttpNotFound();
             }
 
+            if (wiz.Apartament.IdWlasciciel != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             WizytyDisplayViewModel rez = new WizytyDisplayViewModel(wiz);
 
 
             return PartialView("_Odpowiedz", rez);
         }
 
+        [WlascicielAuth]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Odpowiedz(WizytyDisplayViewModel model)
@@ -542,6 +593,11 @@ namespace HotelMVC.Controllers
             if (wiz == null)
             {
                 return HttpNotFound();
+            }
+
+            if (wiz.Apartament.IdWlasciciel != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
             }
 
             wiz.Odpowiedz = model.Odpowiedz;

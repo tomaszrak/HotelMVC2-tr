@@ -21,9 +21,24 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                    <li>@Html.ActionLink("About", "About", "Home")</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                    <li>@Html.ActionLink("Rezerwuj apartament", "Index", "Apartamenty")</li>
+
+                    @if (GlobalObjects.LoggedUser.Uprawnienie == 1) //admin
+                    {
+                        <li>@Html.ActionLink("Moje apartamenty", "MojeApartamenty", "Apartamenty")</li>
+                        <li>@Html.ActionLink("Użytkownicy", "UserList", "Account")</li>
+                    }
+                    else if (GlobalObjects.LoggedUser.Uprawnienie == 2) //właściciel
+                    {
+                        <li>@Html.ActionLink("Moje apartamenty", "MojeApartamenty", "Apartamenty")</li>
+                    }
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li>@Html.ActionLink("Moje wizyty", "MojeWizyty", "Apartamenty")</li>
+                    }
+                    <li>@Html.ActionLink("O nas", "About", "Home")</li>
+                    <li>@Html.ActionLink("Kontakt", "Contact", "Home")</li>
+
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>

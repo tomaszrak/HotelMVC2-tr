@@ -224,6 +224,11 @@ namespace HotelMVC.Controllers
                 return HttpNotFound();
             }
 
+            if (wiz.Apartament.IdWlasciciel != User.Identity.GetUserId())
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
+            }
+
             wiz.Potwierdzona = false;
             db.SaveChanges();
 
